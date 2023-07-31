@@ -9,81 +9,78 @@ public sealed interface Lista<T> permits Nil, Cons {
     Lista NIL = new Nil();
 
     T head();
-    Lista<T> tail( );
-    boolean isEmpty( );
+
+    Lista<T> tail();
+
+    boolean isEmpty();
 
     static <T> Lista<T> of(T h, Lista<T> t) {
-        return new Cons<>(h,t);
+        return new Cons<>(h, t);
     }
 
     static <T> Lista<T> of(T... elems) {
         Lista<T> ret = Lista.NIL;
-        for(int i=elems.length-1; i>=0; i--) {
+        for (int i = elems.length - 1; i >= 0; i--) {
             T h = elems[i];
-            ret = Lista.of(h,ret);
+            ret = Lista.of(h, ret);
         }
         return ret;
     }
 
     default Lista<T> append(T elem) {
-        if(isEmpty()) {
+        if (isEmpty()) {
             return Lista.of(elem);
-        }
-        else {
-            return Lista.of( head(), tail().append(elem) );
+        } else {
+            return Lista.of(head(), tail().append(elem));
         }
     }
 
     default Lista<T> prepend(T elem) {
-        return Lista.of( elem, this);
+        return Lista.of(elem, this);
     }
 
     default Lista<T> remove(T elem) {
-        if( isEmpty() ) {
+        if (isEmpty()) {
             return NIL;
         }
 
-        if( head().equals(elem) ) {
+        if (head().equals(elem)) {
             return tail();
-        }
-        else {
+        } else {
             return Lista.of(head(), tail().remove(elem));
         }
     }
 
     default Lista<T> drop(int n) {
-        if(n<=0 || isEmpty()) {
+        if (n <= 0 || isEmpty()) {
             return this;
-        }
-        else {
-            return tail().drop(n-1);
+        } else {
+            return tail().drop(n - 1);
         }
     }
 
     default Lista<T> dropWhile(Predicate<T> p) {
-        if( isEmpty() ) {
+        if (isEmpty()) {
             return NIL;
         }
 
-        if( p.test(head())  ) {
+        if (p.test(head())) {
             return tail().dropWhile(p);
-        }
-        else {
+        } else {
             return this;
         }
     }
 
     default Lista<T> take(int n) {
-        if(n<=0 || isEmpty() ) {
+        if (n <= 0 || isEmpty()) {
             return NIL;
-        }
-        else {
-            return Lista.of(head(), tail().take(n-1));
+        } else {
+            return Lista.of(head(), tail().take(n - 1));
         }
     }
 
     default Lista<T> takeWhile(Predicate<T> p) {
-        if( isEmpty() || !p.test(head())) {
+        if (isEmpty() || !p.test(head())) {
             return NIL;
         }
 
@@ -91,21 +88,21 @@ public sealed interface Lista<T> permits Nil, Cons {
     }
 
     default Lista<T> concat(Lista<T> ls) {
-        if(isEmpty()) {
+        if (isEmpty()) {
             return ls;
         }
 
         return Lista.of(head(), tail().concat(ls));
     }
 
-    default Lista<T> replace( T elem, T newElem ) {
-        if( isEmpty() ) {
+    default Lista<T> replace(T elem, T newElem) {
+        if (isEmpty()) {
             return Lista.NIL;
         }
 
         return head().equals(elem)
-                ? Lista.of( newElem, tail() )
-                : Lista.of( head(), tail().replace(elem, newElem) );
+                ? Lista.of(newElem, tail())
+                : Lista.of(head(), tail().replace(elem, newElem));
     }
 
     default Optional<T> contains(T elem) {
@@ -118,28 +115,28 @@ public sealed interface Lista<T> permits Nil, Cons {
     }
 
     default void forEach(Consumer<T> fn) {
-        if( !isEmpty() ) {
-            fn.accept( head() );
+        if (!isEmpty()) {
+            fn.accept(head());
             tail().forEach(fn);
         }
     }
 
     default Integer size() {
-        if( isEmpty() ) {
+        if (isEmpty()) {
             return 0;
-        }
-        else {
+        } else {
             return 1 + tail().size();
         }
     }
+
     //--------------------------------
     //Mapeo recursiva
     //this corresponde a T
-    default <U> Lista<U> map(Function<T,U> fn){
+    default <U> Lista<U> map(Function<T, U> fn) {
         return this.isEmpty() ?
                 Lista.NIL
-                :Lista.of(fn.apply(head()),tail().map(fn));
-                //tail().map(fn).prepend(fn.apply(this.head()))
+                : Lista.of(fn.apply(head()), tail().map(fn));
+        //tail().map(fn).prepend(fn.apply(this.head()))
         /*
         if(this.isEmpty()){
             return Lista.NIL;
@@ -152,27 +149,27 @@ public sealed interface Lista<T> permits Nil, Cons {
     }
 
     //
-    default <U> Lista<U> mapIterativo(Function<T,U> fn){
-        var tmp=this;
+    default <U> Lista<U> mapIterativo(Function<T, U> fn) {
+        var tmp = this;
 
-        Lista<U> retTmp=Lista.NIL;
-                while(tmp!=NIL){
-                   T elem=tmp.head();
-                   U newElem=fn.apply(elem);
-                   tmp=tmp.tail();
-                   retTmp=retTmp.prepend(newElem);
-                }
+        Lista<U> retTmp = Lista.NIL;
+        while (tmp != NIL) {
+            T elem = tmp.head();
+            U newElem = fn.apply(elem);
+            tmp = tmp.tail();
+            retTmp = retTmp.prepend(newElem);
+        }
         return retTmp.invertir();
     }
 
-    default Lista<T> invertir(){
-        var tmp=this;
-        Lista<T> retTmp=Lista.NIL;
-        while(tmp!=NIL){
+    default Lista<T> invertir() {
+        var tmp = this;
+        Lista<T> retTmp = Lista.NIL;
+        while (tmp != NIL) {
 
-            retTmp=retTmp.prepend(tmp.head());
+            retTmp = retTmp.prepend(tmp.head());
             //retTmp=Lista.of(tmp.head(),retTmp);
-            tmp=tmp.tail();
+            tmp = tmp.tail();
         }
         return retTmp;
     }
@@ -187,29 +184,35 @@ public sealed interface Lista<T> permits Nil, Cons {
         }
         return acum;
     }
+
     //UxT->U
-    default <U> U foldLeft(U indentity,Function<U,Function<T,U>> fn){
+    default <U> U foldLeft(U indentity, Function<U, Function<T, U>> fn) {
         // -> 1,2,3,4
-        U acc=indentity;
-        var tmp=this;
-        while (!this.isEmpty()){
-            acc=fn.apply(acc).apply(tmp.head());
-            tmp=this.tail();
+        U acc = indentity;
+        var tmp = this;
+        while (!tmp.isEmpty()) {
+            acc = fn.apply(acc).apply(tmp.head());
+            tmp = tmp.tail();
         }
         return acc;
     }
+
     //TxU->U
-    default <U> U foldRight(U identity,Function<T,Function<U,U>> fn){
+    default <U> U foldRight(U identity, Function<T, Function<U, U>> fn) {
         //1,2,3,4 <- recursividad
-           if(this.isEmpty()){
-               return identity;
-        }else{
-               return fn.apply(this.head()).apply(this.tail().foldRight(identity,fn));
-           }
+        //return this.isEmpty() ? identity : fn.apply(this.head()).apply(this.tail().foldRight(identity, fn));
+
+        if (this.isEmpty()) {
+            return identity;
+        } else {
+            // T elem = this.head();
+            // U tmp = this.tail().foldRight(identity, fn);
+            return fn.apply(this.head()).apply(this.tail().foldRight(identity, fn));
+        }
     }
 
-    default Lista<T> invertirL(){
-       return this.foldLeft(Lista.NIL,ls->elem->ls.append(elem));
+    default Lista<T> invertirL() {
+        return this.foldLeft(Lista.NIL, ls -> elem -> ls.append(elem));
 //       if(isEmpty()){
 //        return Lista.NIL;
 //       }else{
@@ -217,6 +220,7 @@ public sealed interface Lista<T> permits Nil, Cons {
 //           return tail().invertirL().append(head());
 //       }
     }
+
     default <U> Lista<U> mapF(Function<T, U> fn) {
         if (isEmpty()) {
             return Lista.NIL;
